@@ -1,0 +1,31 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: calibre-web-tls
+  namespace: calibre-web
+spec:
+  secretName: calibre-web-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+  - calibre.enbom.eu
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: calibre-web
+  namespace: calibre-web
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - match: Host(`calibre.enbom.eu`)
+    kind: Rule
+    services:
+    - name: calibre-web
+      port: 8083
+  tls:
+    secretName: calibre-web-tls

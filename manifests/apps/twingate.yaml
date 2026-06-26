@@ -1,0 +1,77 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: twingate-k8s-1
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://twingate.github.io/helm-charts
+    chart: connector
+    targetRevision: "*"
+    helm:
+      releaseName: twingate-k8s-1
+      values: |
+        connector:
+          network: enbom
+          existingSecret: twingate-k8s-1
+        image:
+          pullPolicy: Always
+        metrics:
+          enabled: true
+        affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: connector
+              topologyKey: kubernetes.io/hostname
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: twingate
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: twingate-k8s-2
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://twingate.github.io/helm-charts
+    chart: connector
+    targetRevision: "*"
+    helm:
+      releaseName: twingate-k8s-2
+      values: |
+        connector:
+          network: enbom
+          existingSecret: twingate-k8s-2
+        image:
+          pullPolicy: Always
+        metrics:
+          enabled: true
+        affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: connector
+              topologyKey: kubernetes.io/hostname
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: twingate
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true

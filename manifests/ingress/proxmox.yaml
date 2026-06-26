@@ -1,0 +1,93 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: proxmox
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: ServersTransport
+metadata:
+  name: proxmox-transport
+  namespace: proxmox
+spec:
+  insecureSkipVerify: true
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pve1
+  namespace: proxmox
+spec:
+  type: ExternalName
+  externalName: pve1.lan
+  ports:
+  - port: 8006
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pve2
+  namespace: proxmox
+spec:
+  type: ExternalName
+  externalName: pve2.lan
+  ports:
+  - port: 8006
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: proxmox-tls
+  namespace: proxmox
+spec:
+  secretName: proxmox-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+  - pve1.enbom.eu
+  - pve2.enbom.eu
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: pve1
+  namespace: proxmox
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - match: Host(`pve1.enbom.eu`)
+    kind: Rule
+    services:
+    - name: pve1
+      port: 8006
+      scheme: https
+      serversTransport: proxmox-transport
+  tls:
+    secretName: proxmox-tls
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: pve2
+  namespace: proxmox
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - match: Host(`pve2.enbom.eu`)
+    kind: Rule
+    services:
+    - name: pve2
+      port: 8006
+      scheme: https
+      serversTransport: proxmox-transport
+  tls:
+    secretName: proxmox-tls
