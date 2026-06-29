@@ -1,0 +1,36 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "timezone": "Europe/Stockholm",
+  "schedule": ["before 6am on Monday"],
+  "labels": ["renovate"],
+  "packageRules": [
+    {
+      "description": "Group all patch updates together",
+      "matchUpdateTypes": ["patch"],
+      "groupName": "patch updates",
+      "automerge": true
+    },
+    {
+      "description": "Separate major updates for manual review",
+      "matchUpdateTypes": ["major"],
+      "labels": ["renovate", "major"]
+    },
+    {
+      "description": "Helm charts",
+      "matchManagers": ["helmv3", "argocd"],
+      "groupName": "helm charts"
+    }
+  ],
+  "kubernetes": {
+    "fileMatch": ["manifests/.*\\.ya?ml$"]
+  },
+  "helm-values": {
+    "fileMatch": ["manifests/.*\\.ya?ml$"]
+  },
+  "argocd": {
+    "fileMatch": ["manifests/.*\\.ya?ml$"]
+  }
+}
